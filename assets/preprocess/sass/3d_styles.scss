@@ -1,0 +1,197 @@
+:root {
+    --scenePerspective: 1;
+    --scenePerspectiveOriginX: 50;
+    --itemZ: 2; // Gap between each cards
+    --cameraSpeed: 900; // Where 1 is the fastest, this var is a multiplying factor of --scenePerspective and --filmZ
+    --cameraZ: 1400; // Initial camera position
+    --viewportHeight: 0; //Simulate Camera Getting Closer
+}
+
+@media only screen and (min-width: 600px) {
+    :root {
+        --cameraZ: 1900; // Initial camera position
+        --scenePerspectiveOriginY: 40;
+    }
+}
+@media only screen and (max-width: 600px) {
+    :root {
+        --cameraZ: 1000; // Initial camera position
+        --scenePerspectiveOriginY: 30;
+    }
+}
+
+/*
+    Microsoft Edge Currently have some implementation issues
+    for CSS 3D Elements. This code will likely change when 
+    they correct the bugs. Here is a link with more about the
+    issues: https://css-tricks.com/things-watch-working-css-3d/
+*/
+
+@supports (display: grid) and (not (-ms-ime-align: auto)) {
+    .main-header {
+        position: fixed;
+        z-index: 100;
+        width: 100vw;
+    }
+
+    //Scrolling Message
+    .scene_3d_wrapper {
+        height: calc(var(--viewportHeight) * 1px);
+    }
+
+    .scene_3d_container {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        perspective: calc(var(--scenePerspective) * var(--cameraSpeed) * 1px);
+        perspective-origin: calc(var(--scenePerspectiveOriginX) * 1%)
+            calc(var(--scenePerspectiveOriginY) * 1%);
+        will-change: perspective-origin; //Allows Hardware-Accelerated CSS, so transitions are smoother
+        transform: translate3d(0, 0, 0);
+
+        // Paper Background
+        background: var(--content-background);
+    }
+
+    .floating_elements_list {
+        position: absolute;
+        top: 0;
+        height: 100vh;
+        width: 100%;
+        transform-style: preserve-3d;
+        transform: translateZ(calc(var(--cameraZ) * 1px));
+        will-change: transform;
+    }
+    .floating_elements_list .floating_element {
+        font-family: Montserrat;
+        transform-style: preserve-3d;
+        position: absolute;
+        font-weight: 600;
+        color: var(--font-color);
+        width: 70%;
+        top: 30%;
+        padding: 25px;
+    }
+    .floating_elements_list .floating_element ul {
+        font-size: 17px;
+        padding-left: 12px;
+    }
+    .floating_elements_list .floating_background_element:before {
+        content: "";
+        position: absolute;
+        top: 0px;
+        left: 0px;
+        width: 100%;
+        height: 100%;
+        z-index: -1;
+    }
+
+    // THE KEY TO EVERYTHING ------------------------------
+    /************ Put here values for variables depending on the device and its size ***/
+    @media only screen and (min-width: 600px) {
+        :root {
+            --elementXBase: 4%;
+            --elementYBase: -2%;
+            --elementXMultiplier: 0;
+            --elementYMultiplier: 0;
+            --elementZMultiplier: 1; //Determine how far back this element is from the one before
+        }
+    }
+
+    @media only screen and (max-width: 600px) {
+        :root {
+            --elementXBase: 4%;
+            --elementYBase: -2%;
+            --elementXMultiplier: 0;
+            --elementYMultiplier: 0;
+            --elementZMultiplier: 1; //Determine how far back this element is from the one before
+        }
+    }
+
+    :root {
+        //Default Values
+        --elementXBase: 4%;
+        --elementYBase: -2%;
+        --elementZBase: 0.1; //Determine how far back this element is from the one before
+        --elementXMultiplier: 1;
+        --elementYMultiplier: 1;
+    }
+
+    .title_element + .title_element {
+        --elementXBase: 4%;
+        --elementYBase: -2%;
+        --elementZBase: 0.1; //Determine how far back this element is from the one before
+        --elementXMultiplier: 1;
+        --elementYMultiplier: 1;
+    }
+
+    .title_element + .title_element {
+        --elementZBase: 11111; //Determine how far back this element is from the one before
+    }
+
+    .outskirt_element:not(:first) {
+        --elementXBase: 4%;
+        --elementYBase: -2%;
+        --elementZBase: 10; //Determine how far back this element is from the one before
+        --elementXMultiplier: 1;
+        --elementYMultiplier: 1;
+    }
+
+    @for $i from 1 through 10 {
+        .floating_element:nth-child(#{$i}) {
+            transform: translate3D(
+                var(--elementXBase),
+                var(--elementYBase),
+                calc(
+                    var(--itemZ) *
+                        var(--cameraSpeed) *
+                        #{$i} *
+                        -1px +
+                        0.1px *
+                        var(--elementZBase)
+                )
+            );
+        }
+    }
+
+    //CHANGE THIS CODE
+    .floating_element:nth-child(2n) {
+        left: 10vw;
+    }
+
+    .floating_element:nth-child(2n + 1) {
+        right: 10vw;
+    }
+
+    .scene_3d_element {
+        transform-style: preserve-3d;
+        position: absolute;
+        width: 100vw;
+        height: 100vh;
+        top: 0;
+        left: 0;
+        background-size: cover;
+    }
+
+    @media only screen and (min-width: 600px) {
+        .floating_elements_list .floating_element {
+            width: 45%;
+        }
+    }
+    @media only screen and (min-width: 2000px) {
+        .floating_elements_list .floating_element {
+            width: 25%;
+        }
+    }
+}
+
+//NOTE - Styling elements
+.floating_text {
+    transition-property: opacity;
+    transition-duration: 0.8s;
+    transition-delay: 0.7s;
+    transition-timing-function: ease-in;
+    opacity: 0;
+}
